@@ -116,7 +116,7 @@ Custom commands receive the full `CommandContext` with access to `fs`, `cwd`, `e
 
 ### Filesystem Options
 
-Four filesystem implementations are available:
+Six filesystem implementations are available:
 
 **InMemoryFs** (default) - Pure in-memory filesystem, no disk access:
 
@@ -136,6 +136,47 @@ const env = new Bash({ fs: overlay, cwd: overlay.getMountPoint() });
 
 await env.exec("cat package.json"); // reads from disk
 await env.exec('echo "modified" > package.json'); // stays in memory
+```
+
+**S3Fs** - Filesystem backed by any S3-compatible object store. Works with AWS S3, Cloudflare R2, MinIO, Backblaze B2. Signs requests with AWS Signature V4 using Web Crypto — pure TypeScript, zero dependencies:
+
+```typescript
+import { Bash, S3Fs, mount } from "just-bash";
+
+const fs = mount({
+  "/data": new S3Fs({
+    bucket: "my-dataset",
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+    prefix: "training/",  // scope to a key prefix
+    readOnly: true,        // optional: prevent writes
+  }),
+});
+
+const bash = new Bash({ fs });
+await bash.exec("cat /data/train.csv | wc -l");
+await bash.exec("ls /data");
+```
+
+For S3-compatible services with custom endpoints:
+
+```typescript
+// Cloudflare R2
+new S3Fs({
+  bucket: "my-bucket",
+  endpoint: "https://ACCOUNT.r2.cloudflarestorage.com",
+  credentials: { accessKeyId: "...", secretAccessKey: "..." },
+});
+
+// MinIO
+new S3Fs({
+  bucket: "my-bucket",
+  endpoint: "http://localhost:9000",
+  credentials: { accessKeyId: "minioadmin", secretAccessKey: "minioadmin" },
+});
 ```
 
 **ReadWriteFs** - Direct read-write access to a real directory. Use this if you want the agent to be agle to write to your disk:

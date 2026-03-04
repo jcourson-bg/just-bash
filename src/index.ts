@@ -41,6 +41,7 @@ export type {
   RmOptions,
   SymlinkEntry,
 } from "./fs/interface.js";
+export { mount } from "./fs/mount.js";
 export {
   MountableFs,
   type MountableFsOptions,
@@ -51,6 +52,11 @@ export {
   ReadWriteFs,
   type ReadWriteFsOptions,
 } from "./fs/read-write-fs/index.js";
+export {
+  type S3Credentials,
+  S3Fs,
+  type S3FsOptions,
+} from "./fs/s3-fs/index.js";
 export type { NetworkConfig, SecureFetch } from "./network/index.js";
 export {
   NetworkAccessDeniedError,

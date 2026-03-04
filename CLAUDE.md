@@ -121,8 +121,15 @@ Input Script → Parser (src/parser/) → AST (src/ast/) → Interpreter (src/in
 - Each command in its own directory with implementation + tests
 - Registry pattern via `registry.ts`
 
-**Filesystem** (`src/fs.ts`, `src/overlay-fs/`): In-memory VFS with optional overlay on real filesystem
+**Filesystem** (`src/fs/`): In-memory VFS with pluggable backends
 
+- `interface.ts` - `IFileSystem` interface all backends implement
+- `in-memory-fs/` - Pure in-memory filesystem (default)
+- `overlay-fs/` - Copy-on-write over a real directory (reads from disk, writes to memory)
+- `read-write-fs/` - Direct read-write to a real directory
+- `s3-fs/` - Filesystem backed by any S3-compatible object store (AWS S3, R2, MinIO). Signs with AWS Sig V4 using Web Crypto. Zero dependencies.
+- `mountable-fs/` - Compose multiple `IFileSystem` backends at different mount points
+- `mount.ts` - `mount()` helper for concise filesystem composition
 - `real-fs-utils.ts` - Shared security helpers for real-FS-backed implementations
 - `OverlayFs` / `ReadWriteFs` - Both default to `allowSymlinks: false` (symlinks blocked)
 - Symlink policy is enforced at central gate functions (`resolveAndValidate`, `validateRealPath_`) so new methods get protection automatically
